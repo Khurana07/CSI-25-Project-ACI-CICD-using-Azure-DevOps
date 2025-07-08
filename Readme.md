@@ -1,89 +1,137 @@
-# Automated Azure Container Instance Deployment with Azure DevOps CI/CD Pipelines
+# Step 1: Azure CLI Authentication and Verification
 
-![Azure DevOps CI/CD Pipeline](https://thomasthornton.cloud/wp-content/uploads/2022/01/cici-containers-terraform.jpg) <!-- Replace with an actual link to a relevant image -->
+## Overview
 
-## Project Description
-
-This project aims to automate the deployment of Azure Container Instances (ACI) using Azure DevOps CI/CD pipelines for streamlined delivery of containerized applications. The solution is designed for a leading finance company facing challenges in managing the development and testing of containerized applications in non-production environments. 
-
-By leveraging ACI and Azure DevOps, we establish a controlled testing environment that ensures the reliability and functionality of applications without disrupting production systems.
-
-## Business Problem Statement
-
-The finance company requires an effective way to manage the development and testing of containerized applications in non-production environments. The goal is to create a solution that leverages ACI and Azure DevOps CI/CD pipelines to ensure a controlled testing environment that guarantees application reliability and functionality.
+This step involves authenticating with Azure CLI, verifying your Azure account details, and setting the default Azure subscription if needed. This ensures that you can manage Azure resources effectively for the project.
 
 ## Prerequisites
 
 - An Azure account
-- Azure DevOps Organization and project
-- A Dockerized sample Spring Boot Java application
-- Service Principal and Service Connection
+- Azure CLI installed on your machine
 
-## High-Level Architecture
+## Step-by-Step Instructions
 
-```mermaid
-graph TD;
-    A[Developers] -->|Code Commit| B[Azure Repo];
-    B -->|Trigger CI| C[Azure Pipeline - CI];
-    C -->|Build & Push| D[Azure Container Registry];
-    D -->|Trigger CD| E[Azure Pipeline - CD];
-    E -->|Deploy| F[Azure Container Instance];
-    F -->|Testing| G[Automated Testing];
-    G -->|Monitoring & Feedback| H[Monitoring Solutions];
-    H -->|Inform| A;
+### 1. Log in to Azure CLI
+
+Run the following command to initiate the login process:
+
+```bash
+az login
 ```
 
-## CI/CD Process
+Follow the instructions provided in your terminal to complete the login. This typically involves opening a browser window where you'll enter your Azure credentials and grant access to the Azure CLI.
 
-### Code Commit
-- Developers commit code changes to the Git repository.
+If you encounter any issues or prefer an alternative login method, you can use device code flow with:
 
-### Continuous Integration (CI)
-1. CI pipeline builds the application into a container image.
-2. The image is pushed to Azure Container Registry (ACR).
+```bash
+az login --use-device-code
+```
 
-### Continuous Deployment (CD)
-1. CD pipeline deploys the image to Azure Container Instances (ACI).
-2. Resource allocation and networking settings are configured.
+Follow the on-screen instructions to complete the login using a web browser or by entering a device code.
 
-### Automated Testing
-- Automated tests validate application functionality post-deployment.
+### 2. Verify Your Azure Account
 
-### Monitoring and Feedback
-- Monitoring solutions track application performance.
-- Feedback informs future development iterations.
+After successful login, verify that your Azure account is set up correctly:
 
-## Helpful Documents
+```bash
+az account show
+```
 
-- [Deploy Azure Container Instances using Azure DevOps CI/CD pipelines](https://kharrat-mariem.medium.com/deploy-azure-container-instances-using-azure-devops-ci-cd-pipelines-e42b2fb252ce)
-- [Deploy to Azure Container Instance from Azure Container Registry using a CI/CD Azure DevOps Pipeline and Terraform](https://thomasthornton.cloud/2022/01/26/deploy-to-azure-container-instance-from-azure-container-registry-using-a-ci-cd-azure-devops-pipeline-and-terraform/)
+This command should display details about your currently logged-in Azure account, including subscription information.
 
-## Setup Instructions
+Example output:
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
-   ```
+```json
+{
+  "environmentName": "AzureCloud",
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "isDefault": true,
+  "name": "My Subscription",
+  "state": "Enabled",
+  "tenantId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "user": {
+    "name": "your-email@example.com",
+    "type": "user"
+  }
+}
+```
 
-2. **Build Docker Image**:
-   ```bash
-   docker build -t your-image-name .
-   ```
+### 3. Set Default Subscription (if needed)
 
-3. **Push Image to Azure Container Registry**:
-   ```bash
-   az acr login --name yourACRName
-   docker tag your-image-name yourACRName.azurecr.io/your-image-name
-   docker push yourACRName.azurecr.io/your-image-name
-   ```
+If you have multiple Azure subscriptions associated with your account, you can set the default subscription to use:
 
-4. **Set up Azure DevOps Pipeline**:
-   - Create a new pipeline in Azure DevOps.
-   - Configure the pipeline with the provided YAML configuration.
-   - Ensure the pipeline includes tasks for building the Docker image and pushing it to ACR.
+1. List all the subscriptions associated with your Azure account:
 
-5. **Configure Azure Container Instance**:
-   - Create an ACI in the Azure portal.
-   - Set up networking and resource allocation as required.
-   - Deploy the container image from ACR to ACI.
+    ```bash
+    az account list --output table
+    ```
+
+    Example output:
+
+    ```
+    Name              CloudName    SubscriptionId                        State    IsDefault
+    ----------------  -----------  ------------------------------------  -------  -----------
+    My Subscription   AzureCloud   xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  Enabled  True
+    Another Sub       AzureCloud   yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy  Enabled  False
+    ```
+
+2. Set a specific subscription as the default:
+
+    ```bash
+    az account set --subscription SUBSCRIPTION_ID_OR_NAME
+    ```
+
+    Replace `SUBSCRIPTION_ID_OR_NAME` with either the ID or the name of the subscription you want to set as default.
+
+    Example:
+
+    ```bash
+    az account set --subscription yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+    ```
+
+    or
+
+    ```bash
+    az account set --subscription "Another Sub"
+    ```
+
+3. Confirm that the correct subscription is now set as default:
+
+    ```bash
+    az account show
+    ```
+
+### 4. Explore Azure Resources
+
+Now that you are logged in and authenticated, you can start managing Azure resources using Azure CLI commands. Here are some examples:
+
+- List all virtual machines:
+
+    ```bash
+    az vm list --output table
+    ```
+
+- List all storage accounts:
+
+    ```bash
+    az storage account list --output table
+    ```
+
+- List all resource groups:
+
+    ```bash
+    az group list --output table
+    ```
+
+## Troubleshooting
+
+- **Re-run `az login`**: Ensure you are still logged in by running `az login` if needed.
+- **Check Network Connectivity**: Ensure you have a stable internet connection and there are no network restrictions blocking Azure CLI from accessing Azure services.
+- **Clear Azure CLI Cache**: If issues persist, try clearing the Azure CLI cache:
+
+    ```bash
+    rm -rf ~/.azure/
+    ```
+
+    Then, re-run `az login` and `az account show`.
+- **Check Azure Service Status**: Verify if there are any ongoing issues or maintenance affecting Azure services by checking the Azure Service Status page.
